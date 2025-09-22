@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     LLM: str
 
 
-@st.cache_resource
+# @st.cache_resource
 def _settings():
     return Settings()
 

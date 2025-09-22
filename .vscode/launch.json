@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "App",
+            "name": "Streamlit",
             "type": "debugpy",
             "request": "launch",
             "module": "streamlit",
@@ -14,7 +14,18 @@
                 "app.py",
                 "--server.runOnSave",
                 "true"
-            ]
-        }
+            ],
+            "envFile": ""
+        },
+        {
+            "name": "Gradio",
+            "type": "debugpy",
+            "request": "launch",
+            "program": ".venv/bin/gradio",
+            "args": [
+                "app_gradio.py"
+            ],
+            "envFile": ""
+        },
     ]
 }
