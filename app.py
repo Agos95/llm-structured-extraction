@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import re
 from typing import TYPE_CHECKING, TypedDict
 
 import pdfplumber
@@ -94,6 +95,14 @@ def extract_text(file: "UploadedFile") -> list[PageObject]:
     return pages
 
 
+def _check_schema(schema: dict):
+    title = schema.get("title", "root-model")
+    schema["title"] = re.sub(r"[^\w\d]", "-", title)
+    if "description" not in schema:
+        schema["description"] = f"Description for {title}"
+    return schema
+
+
 @st.cache_resource
 def _llm():
     return ChatBedrockConverse(
@@ -110,6 +119,7 @@ def _call_llm(pages: list[PageObject], schema: str | dict) -> dict:
         raise ValueError("Specify a JSON schema")
     if isinstance(schema, str):
         schema = json.loads(schema)
+    schema = _check_schema(schema)
     llm = _llm().with_structured_output(schema)
     messages = [SystemMessage(_PROMPT)]
 
@@ -176,6 +186,13 @@ with schema_col:
     code_editor = st_code_editor(
         "{}", lang="json", allow_reset=True, response_mode="blur", key="code_editor"
     )
+    text = code_editor.get("text", None)
+    if text:
+        if '"description"' not in text:
+            st.warning(
+                'You should add a "description" field in the json schema',
+                icon=":material/warning:",
+            )
 
 if st.button("Run", key="run"):
     pages = extract_text(uploaded_file)
